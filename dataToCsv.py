@@ -50,9 +50,9 @@ with mp_hands.Hands(
                     #    f'{hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y * image_height})'
                     #)
                     # index of sign
-                    if dir == 'del': data_file.write('27')
-                    elif dir == 'nothing': data_file.write('28')
-                    elif dir == 'space': data_file.write('29')
+                    if dir == 'del': data_file.write('26')
+                    elif dir == 'nothing': data_file.write('27')
+                    elif dir == 'space': data_file.write('28')
                     else: data_file.write(str(ord(dir)-ord('A')))
                     # coordinates of points
                     for i in range(NUMBER_OF_POINTS_IN_HAND):
@@ -61,7 +61,7 @@ with mp_hands.Hands(
                         data_file.write(','+str( hand_landmarks.landmark[i].z))
                     data_file.write('\n')
             elif dir == 'nothing':
-                data_file.write('28')
+                data_file.write('27')
                 for i in range(3*NUMBER_OF_POINTS_IN_HAND):
                     data_file.write(',0')
                 data_file.write('\n')
