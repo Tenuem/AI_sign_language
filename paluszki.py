@@ -92,9 +92,9 @@ with mp_hands.Hands(
     else:
         letter = chr(np.argmax(prediction)+ord('A'))
     cv2.putText(image, f'Predicted: {letter}', (20, 70), cv2.FONT_HERSHEY_PLAIN, 3, (0, 196, 255), 2)
-    cv2.imshow('MediaPipe Hands', image)
+    cv2.imshow('AI sign language detection', image)
     if cv2.waitKey(5) & 0xFF == 27:
       break
-    if cv2.getWindowProperty('MediaPipe Hands',prop_id=cv2.WND_PROP_VISIBLE) <1:
+    if cv2.getWindowProperty('AI sign language detection',prop_id=cv2.WND_PROP_VISIBLE) <1:
         break
 cap.release()
