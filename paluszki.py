@@ -44,7 +44,9 @@ prediction = model.predict(np.array([test]))
 print(np.argmax(prediction[0]))
 
 data = [0]*63
+
 cap = cv2.VideoCapture(0)
+
 ##For Video
 #cap = cv2.VideoCapture("hands.mp4")
 prevTime = 0
@@ -93,4 +95,6 @@ with mp_hands.Hands(
     cv2.imshow('MediaPipe Hands', image)
     if cv2.waitKey(5) & 0xFF == 27:
       break
+    if cv2.getWindowProperty('MediaPipe Hands',prop_id=cv2.WND_PROP_VISIBLE) <1:
+        break
 cap.release()
