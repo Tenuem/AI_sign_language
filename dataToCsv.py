@@ -6,16 +6,16 @@ mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
 
 NUMBER_OF_POINTS_IN_HAND = 21
-path = 'C:\\Python\\Projects\\paluszki\\datasrata'
+path = 'C:\\Users\\PATRYK\\Desktop\\Studia\\4SEM\\SI\\AI\\AI\\data_test'
 # For static images:
 with mp_hands.Hands(
     static_image_mode=True,
-    max_num_hands=2,
+    max_num_hands=1,
     min_detection_confidence=0.5) as hands:
     #create csv header
-    data_file = open('test_data.csv','w')
+    data_file = open('testing_data.csv','w')
     data_file.write('sign')
-    for i in range(NUMBER_OF_POINTS_IN_HAND):
+    for i in range(NUMBER_OF_POINTS_IN_HAND-1):
         data_file.write(',x'+str(i))
         data_file.write(',y'+str(i))
         data_file.write(',z'+str(i))
@@ -32,16 +32,29 @@ with mp_hands.Hands(
         for f in file_list:
             total += 1
             #print(f)
+            
             image = cv2.imread(file_path+'\\'+f)  
-            # Convert the BGR image to RGB before processing.
+            #results = hands.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+    
+            #if not results.multi_hand_landmarks:
+                # Convert the BGR image to RGB before processing.
+            image = cv2.resize(image,(200,200))
             results = hands.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+            if not results.multi_hand_landmarks:
+                    image = cv2.copyMakeBorder(image,top=100,bottom=100,right=100,left=100,borderType=cv2.BORDER_CONSTANT, value=[0,0,0])
+                    results = hands.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+                
+            
 
             # Print handedness and draw hand landmarks on the image.
             #print('Handedness:', results.multi_handedness)
             image_height, image_width, _ = image.shape
             annotated_image = image.copy()
             if results.multi_hand_landmarks:
+                
                 for hand_landmarks in results.multi_hand_landmarks:
+                    #mp_drawing.draw_landmarks(annotated_image,hand_landmarks,mp_hands.HAND_CONNECTIONS)
+                    #cv2.imwrite(path+'\\drawed_'+f,annotated_image)
                     #print('hand_landmarks:', hand_landmarks)
                     #print(
                     #    f'Index finger tip coordinates: (',
@@ -54,15 +67,15 @@ with mp_hands.Hands(
                     elif dir == 'space': data_file.write('28')
                     else: data_file.write(str(ord(dir)-ord('A')))
                     # coordinates of points
-                    for i in range(NUMBER_OF_POINTS_IN_HAND):
-                        data_file.write(',' + str(hand_landmarks.landmark[i].x))
-                        data_file.write(','+str( hand_landmarks.landmark[i].y))
-                        data_file.write(','+str( hand_landmarks.landmark[i].z))
+                    for i in range(NUMBER_OF_POINTS_IN_HAND-1):
+                        data_file.write(',' + str(hand_landmarks.landmark[i+1].x-hand_landmarks.landmark[0].x))
+                        data_file.write(','+str( hand_landmarks.landmark[i+1].y-hand_landmarks.landmark[0].y))
+                        data_file.write(','+str( hand_landmarks.landmark[i+1].z-hand_landmarks.landmark[0].z))
                     data_file.write('\n')
                 #if hand is not recognized but there is noone on the photo
             elif dir == 'nothing':
                 data_file.write('27')
-                for i in range(3*NUMBER_OF_POINTS_IN_HAND):
+                for i in range(3*(NUMBER_OF_POINTS_IN_HAND-1)):
                     data_file.write(',0')
                 data_file.write('\n')
             else: 

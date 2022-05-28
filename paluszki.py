@@ -1,3 +1,4 @@
+from pickle import FALSE, TRUE
 import tensorflow as tf
 import pandas as pd
 import numpy as np 
@@ -6,35 +7,24 @@ import mediapipe as mp
 mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
 import time
+from training import ModelTrainer
+LOAD = TRUE
+signs = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','DEL','NOTHING','SPACE']
 
-
-try :
-    model = tf.keras.models.load_model("trained.h5")
-except:
-    test_data = pd.read_csv('test_data.csv')
-    test_features = test_data.copy()
-    test_labels = test_features.pop('sign')
-    test_features = np.array(test_features)
-    print(test_labels)
-    model= tf.keras.models.Sequential()
-    model.add(tf.keras.layers.Flatten(input_shape=(63,1)))
-    model.add(tf.keras.layers.Dense(units=180,activation=tf.nn.relu))
-    model.add(tf.keras.layers.Dense(units=180,activation=tf.nn.relu))
-    model.add(tf.keras.layers.Dense(units=30,activation=tf.nn.softmax))
-    model.compile(optimizer='adam' , loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-    model.fit(test_features, test_labels, epochs=50, steps_per_epoch=36,batch_size=18)#As the number of epochs increases beyond 11,chance of overfitting of the model on training data
-    model.save("trained.h5")
-    test = test_features[0]
-    prediction = model.predict(np.array([test]))
     
-    print(np.argmax(prediction[0]))
+model = tf.keras.models.load_model("trained.h5")
+trainer = ModelTrainer("test_data.csv","testing_data.csv",'sign')
+trainer.loadData()
+results = model.evaluate(trainer.test_features,trainer.test_labels,batch_size=240)
+print("test loss, test acc:", results)
+    #else:
+     # trainer = ModelTrainer("test_data.csv","testing_data.csv",'sign')
+     # trainer.loadData()
+      #model = trainer.trainNeuralNetwork()
+
+
     
-#print(test)
-
-
-
-
-data = [0]*63
+data = [0]*60
 
 cap = cv2.VideoCapture(0)
 
@@ -46,7 +36,6 @@ with mp_hands.Hands(
     success, image = cap.read()
     if not success:
       print("Ignoring empty camera frame.")
-      # If loading a video, use 'break' instead of 'continue'.
       continue
 
     # Flip the image horizontally for a later selfie-view display, and convert
@@ -64,22 +53,18 @@ with mp_hands.Hands(
       for hand_landmarks in results.multi_hand_landmarks:
        # mp_drawing.draw_landmarks(
         #    image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
-        for i in range(21):
+        for i in range(1,20):
             data[3*i] = hand_landmarks.landmark[i].x
             data[3*i+1] = hand_landmarks.landmark[i].y
             data[3*i+2] = hand_landmarks.landmark[i].z
         
     else:
-        data = [0]*63 
+        data = [0]*60 
     prediction = model.predict(np.array([data]))   
     currTime = time.time()
     fps = 1 / (currTime - prevTime)
     prevTime = currTime
-    if np.argmax(prediction) == 27: letter = 'del'
-    elif np.argmax(prediction) == 28: letter = 'nothing'
-    elif np.argmax(prediction) == 29: letter = 'space'
-    else:
-        letter = chr(np.argmax(prediction)+ord('A'))
+    letter = signs[np.argmax(prediction)]
     cv2.putText(image, f'Predicted: {letter}', (20, 70), cv2.FONT_HERSHEY_DUPLEX, 1, (128, 0, 128), 2)
     cv2.imshow('AI sign language detection', image)
     if cv2.waitKey(5) & 0xFF == 27:
