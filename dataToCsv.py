@@ -1,6 +1,5 @@
 import cv2
 import mediapipe as mp
-import numpy as np
 import os
 
 mp_drawing = mp.solutions.drawing_utils
@@ -60,6 +59,7 @@ with mp_hands.Hands(
                         data_file.write(','+str( hand_landmarks.landmark[i].y))
                         data_file.write(','+str( hand_landmarks.landmark[i].z))
                     data_file.write('\n')
+                #if hand is not recognized but there is noone on the photo
             elif dir == 'nothing':
                 data_file.write('27')
                 for i in range(3*NUMBER_OF_POINTS_IN_HAND):
@@ -69,6 +69,6 @@ with mp_hands.Hands(
                 print(f'unsuccessful attempt in dir {dir} in file {f}')
                 failures += 1
             
-    print(f'For {total} attempts {(total-failures)//total * 100}% were successful')
+    print(f'For {total} attempts {(total-failures)/total * 100}% were successful')
     data_file.close()     
         

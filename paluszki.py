@@ -7,48 +7,37 @@ mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
 import time
 
-test_data = pd.read_csv('test_data.csv')
 
-print(test_data['sign'])
-
-test_features = test_data.copy()
-test_labels = test_features.pop('sign')
-test_features = np.array(test_features)
-'''
-test_model = tf.keras.Sequential([
-    tf.keras.layers.Dense(64),
-    tf.keras.layers.Dense(1)
-])
-#tf.keras.metrics.Accuracy(name = 'accuracy', dtype = None)
-test_model.compile(loss = tf.keras.losses.MeanSquaredError(), 
-                   optimizer = tf.optimizers.Adam(),
-                   metrics = [tf.keras.metrics.Accuracy()])
-
-test_model.fit(test_features, test_labels, epochs = 10)
-print(test_model.predict(test_features[0]))
-'''
-print(test_labels)
-model= tf.keras.models.Sequential()
-model.add(tf.keras.layers.Flatten(input_shape=(63,1)))
-model.add(tf.keras.layers.Dense(units=128,activation=tf.nn.relu))
-model.add(tf.keras.layers.Dense(units=128,activation=tf.nn.relu))
-model.add(tf.keras.layers.Dense(units=30,activation=tf.nn.softmax))
-model.compile(optimizer='adam' , loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-model.fit(test_features, test_labels, epochs=50, steps_per_epoch=36)#As the number of epochs increases beyond 11,chance of overfitting of the model on training data
-
-test = test_features[0]
+try :
+    model = tf.keras.models.load_model("trained.h5")
+except:
+    test_data = pd.read_csv('test_data.csv')
+    test_features = test_data.copy()
+    test_labels = test_features.pop('sign')
+    test_features = np.array(test_features)
+    print(test_labels)
+    model= tf.keras.models.Sequential()
+    model.add(tf.keras.layers.Flatten(input_shape=(63,1)))
+    model.add(tf.keras.layers.Dense(units=180,activation=tf.nn.relu))
+    model.add(tf.keras.layers.Dense(units=180,activation=tf.nn.relu))
+    model.add(tf.keras.layers.Dense(units=30,activation=tf.nn.softmax))
+    model.compile(optimizer='adam' , loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+    model.fit(test_features, test_labels, epochs=50, steps_per_epoch=36,batch_size=18)#As the number of epochs increases beyond 11,chance of overfitting of the model on training data
+    model.save("trained.h5")
+    test = test_features[0]
+    prediction = model.predict(np.array([test]))
+    
+    print(np.argmax(prediction[0]))
+    
 #print(test)
-prediction = model.predict(np.array([test]))
 
 
-print(np.argmax(prediction[0]))
+
 
 data = [0]*63
 
 cap = cv2.VideoCapture(0)
 
-##For Video
-#cap = cv2.VideoCapture("hands.mp4")
 prevTime = 0
 with mp_hands.Hands(
     min_detection_confidence=0.5,       #Detection Sensitivity
@@ -91,7 +80,7 @@ with mp_hands.Hands(
     elif np.argmax(prediction) == 29: letter = 'space'
     else:
         letter = chr(np.argmax(prediction)+ord('A'))
-    cv2.putText(image, f'Predicted: {letter}', (20, 70), cv2.FONT_HERSHEY_PLAIN, 3, (0, 196, 255), 2)
+    cv2.putText(image, f'Predicted: {letter}', (20, 70), cv2.FONT_HERSHEY_DUPLEX, 1, (128, 0, 128), 2)
     cv2.imshow('AI sign language detection', image)
     if cv2.waitKey(5) & 0xFF == 27:
       break
