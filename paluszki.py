@@ -11,16 +11,16 @@ from training import ModelTrainer
 LOAD = TRUE
 signs = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','DEL','NOTHING','SPACE']
 
-    
-model = tf.keras.models.load_model("trained.h5")
-trainer = ModelTrainer("test_data.csv","testing_data.csv",'sign')
-trainer.loadData()
-results = model.evaluate(trainer.test_features,trainer.test_labels,batch_size=240)
-print("test loss, test acc:", results)
-    #else:
-     # trainer = ModelTrainer("test_data.csv","testing_data.csv",'sign')
-     # trainer.loadData()
-      #model = trainer.trainNeuralNetwork()
+if LOAD == TRUE :
+  model = tf.keras.models.load_model("trained.h5")
+  trainer = ModelTrainer("test_data.csv","testing_data.csv",'sign')
+  trainer.loadData()
+  
+else: 
+    trainer = ModelTrainer("test_data.csv","testing_data.csv",'sign')
+    trainer.loadData()
+    trainer.createNeuralNetowrkModel()
+    model = trainer.trainNeuralNetwork()
 
 
     
@@ -50,6 +50,7 @@ with mp_hands.Hands(
     image.flags.writeable = True
     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
     if results.multi_hand_landmarks:
+      print(results.label)
       for hand_landmarks in results.multi_hand_landmarks:
        # mp_drawing.draw_landmarks(
         #    image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
@@ -60,7 +61,7 @@ with mp_hands.Hands(
         
     else:
         data = [0]*60 
-    prediction = model.predict(np.array([data]))   
+    prediction = model.predict(np.array([data]),verbose=0)   
     currTime = time.time()
     fps = 1 / (currTime - prevTime)
     prevTime = currTime

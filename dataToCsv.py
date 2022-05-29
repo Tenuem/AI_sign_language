@@ -53,14 +53,11 @@ with mp_hands.Hands(
             if results.multi_hand_landmarks:
                 
                 for hand_landmarks in results.multi_hand_landmarks:
+                #image saving with landmarks for test purpose
                     #mp_drawing.draw_landmarks(annotated_image,hand_landmarks,mp_hands.HAND_CONNECTIONS)
                     #cv2.imwrite(path+'\\drawed_'+f,annotated_image)
-                    #print('hand_landmarks:', hand_landmarks)
-                    #print(
-                    #    f'Index finger tip coordinates: (',
-                    #    f'{hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].x * image_width}, '
-                    #    f'{hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y * image_height})'
-                    #)
+
+                
                     # index of sign
                     if dir == 'del': data_file.write('26')
                     elif dir == 'nothing': data_file.write('27')

@@ -22,15 +22,21 @@ class ModelTrainer:
         self.test_features = self.test_data.copy()
         self.test_labels = self.test_features.pop(self.labels)
         self.test_features = np.array(self.test_features)
-    
+
+    def createNeuralNetowrkModel(self):
+        self.model= tf.keras.models.Sequential()
+        self.model.add(tf.keras.layers.Flatten(input_shape=(60,1)))
+        self.model.add(tf.keras.layers.Dense(units=180,activation=tf.nn.sigmoid))
+        self.model.add(tf.keras.layers.Dense(units=180,activation=tf.nn.sigmoid))
+        self.model.add(tf.keras.layers.Dense(units=29,activation=tf.nn.softmax))
+        self.model.compile(optimizer='adam' , loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+
     def trainNeuralNetwork(self):
-        model= tf.keras.models.Sequential()
-        model.add(tf.keras.layers.Flatten(input_shape=(60,1)))
-        model.add(tf.keras.layers.Dense(units=180,activation=tf.nn.sigmoid))
-        model.add(tf.keras.layers.Dense(units=180,activation=tf.nn.sigmoid))
-        model.add(tf.keras.layers.Dense(units=29,activation=tf.nn.softmax))
-        model.compile(optimizer='adam' , loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-        model.fit(self.training_features, self.training_labels, epochs=1000)#As the number of epochs increases beyond 11,chance of overfitting of the model on training data
-        model.save("trained.h5")
-        return model
-        #TODO add model testing accuracy on test data
+        self.model.fit(self.training_features, self.training_labels, epochs=100)
+        self.model.save("trained.h5")
+        results = self.model.evaluate(self.test_features,self.test_labels)
+        print("test loss, test acc:", results)
+        return self.model
+    def evaluate(self):
+        results = self.model.evaluate(self.test_features,self.test_labels)
+        print(f"test loss: {results[0]}, test acc: {results[1]}", )
