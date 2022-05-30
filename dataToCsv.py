@@ -1,3 +1,4 @@
+import random
 import cv2
 import mediapipe as mp
 import os
@@ -6,20 +7,26 @@ mp_drawing = mp.solutions.drawing_utils
 mp_hands = mp.solutions.hands
 
 NUMBER_OF_POINTS_IN_HAND = 21
-path = 'C:\\Users\\PATRYK\\Desktop\\Studia\\4SEM\\SI\\AI\\AI\\data_test'
+path = 'C:\\Users\\Patryk\\Desktop\\Studia\\SI\\AI\\data'
 # For static images:
 with mp_hands.Hands(
     static_image_mode=True,
     max_num_hands=1,
     min_detection_confidence=0.5) as hands:
     #create csv header
-    data_file = open('testing_data.csv','w')
+    data_file = open('training_data.csv','w')
+    testing_file = open('testing_data.csv','w')
     data_file.write('sign')
+    testing_file.write('sign')
     for i in range(NUMBER_OF_POINTS_IN_HAND-1):
         data_file.write(',x'+str(i))
         data_file.write(',y'+str(i))
         data_file.write(',z'+str(i))
+        testing_file.write(',x'+str(i))
+        testing_file.write(',y'+str(i))
+        testing_file.write(',z'+str(i))
     data_file.write('\n')
+    testing_file.write('\n')
    
     failures = 0
     total = 0
@@ -43,42 +50,46 @@ with mp_hands.Hands(
             if not results.multi_hand_landmarks:
                     image = cv2.copyMakeBorder(image,top=100,bottom=100,right=100,left=100,borderType=cv2.BORDER_CONSTANT, value=[0,0,0])
                     results = hands.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-                
-            
 
             # Print handedness and draw hand landmarks on the image.
             #print('Handedness:', results.multi_handedness)
             image_height, image_width, _ = image.shape
             annotated_image = image.copy()
+            chance = random.randint(0,100)
+            if chance < 15:
+                file_to_write = testing_file
+            else:
+                file_to_write = data_file
             if results.multi_hand_landmarks:
                 
                 for hand_landmarks in results.multi_hand_landmarks:
                 #image saving with landmarks for test purpose
-                    #mp_drawing.draw_landmarks(annotated_image,hand_landmarks,mp_hands.HAND_CONNECTIONS)
-                    #cv2.imwrite(path+'\\drawed_'+f,annotated_image)
+                       # mp_drawing.draw_landmarks(annotated_image,hand_landmarks,mp_hands.HAND_CONNECTIONS)
+                       # cv2.imwrite(path+'\\drawed_'+f,annotated_image)
 
                 
                     # index of sign
-                    if dir == 'del': data_file.write('26')
-                    elif dir == 'nothing': data_file.write('27')
-                    elif dir == 'space': data_file.write('28')
-                    else: data_file.write(str(ord(dir)-ord('A')))
+                    if dir == 'del': file_to_write.write('26')
+                    elif dir == 'nothing': file_to_write.write('27')
+                    elif dir == 'space': file_to_write.write('28')
+                    else: file_to_write.write(str(ord(dir)-ord('A')))
                     # coordinates of points
                     for i in range(NUMBER_OF_POINTS_IN_HAND-1):
-                        data_file.write(',' + str(hand_landmarks.landmark[i+1].x-hand_landmarks.landmark[0].x))
-                        data_file.write(','+str( hand_landmarks.landmark[i+1].y-hand_landmarks.landmark[0].y))
-                        data_file.write(','+str( hand_landmarks.landmark[i+1].z-hand_landmarks.landmark[0].z))
-                    data_file.write('\n')
+                        file_to_write.write(',' + str(hand_landmarks.landmark[i+1].x-hand_landmarks.landmark[0].x))
+                        file_to_write.write(','+str( hand_landmarks.landmark[i+1].y-hand_landmarks.landmark[0].y))
+                        file_to_write.write(','+str( hand_landmarks.landmark[i+1].z-hand_landmarks.landmark[0].z))
+                    file_to_write.write('\n')
                 #if hand is not recognized but there is noone on the photo
             elif dir == 'nothing':
-                data_file.write('27')
+                file_to_write.write('27')
                 for i in range(3*(NUMBER_OF_POINTS_IN_HAND-1)):
-                    data_file.write(',0')
-                data_file.write('\n')
+                    file_to_write.write(',0')
+                file_to_write.write('\n')
             else: 
                 print(f'unsuccessful attempt in dir {dir} in file {f}')
                 failures += 1
             
     print(f'For {total} attempts {(total-failures)/total * 100}% were successful')
-    data_file.close()     
+    data_file.close()  
+    testing_file.close()   
         
